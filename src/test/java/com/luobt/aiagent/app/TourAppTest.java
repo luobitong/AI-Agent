@@ -45,4 +45,12 @@ class TourAppTest {
 
         Thread.sleep(Duration.ofSeconds(10).toMillis());
     }
+
+    @Test
+    void doChatWithReport() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "你好，我是美美，我下周一个人想去北京旅游，预算只有2000，但我不知道该怎么做";
+        TourApp.TourReport tourReport = tourApp.doChatWithReport(message, chatId);
+        Assertions.assertNotNull(tourReport);
+    }
 }

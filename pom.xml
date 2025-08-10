@@ -65,6 +65,12 @@
             <artifactId>langchain4j-community-dashscope</artifactId>
             <version>1.0.0-beta2</version>
         </dependency>
+        <!-- 支持结构化输出 -->
+        <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-generator</artifactId>
+            <version>4.38.0</version>
+        </dependency>
         <!-- https://docs.spring.io/spring-ai/reference/api/chat/ollama-chat.html -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
