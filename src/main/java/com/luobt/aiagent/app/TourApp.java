@@ -2,6 +2,8 @@ package com.luobt.aiagent.app;
 
 import com.luobt.aiagent.advisor.MyLoggerAdvisor;
 import com.luobt.aiagent.advisor.ReReadingAdvisor;
+import com.luobt.aiagent.chatmemory.FileBasedChatMemory;
+import com.luobt.aiagent.constant.FileConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -42,13 +44,16 @@ public class TourApp {
      */
     public TourApp(ChatModel dashscopeChatModel) {
         // 初始化基于内存的对话记忆
-        ChatMemory chatMemory = new InMemoryChatMemory();
+//        ChatMemory chatMemory = new InMemoryChatMemory();
+        // 初始化基于文件的对话记忆
+        String fileDir = FileConstant.FILE_SAVE_DIR + "/chat-memory";
+        ChatMemory chatMemory = new FileBasedChatMemory(fileDir);
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         new MessageChatMemoryAdvisor(chatMemory),
-                        new SimpleLoggerAdvisor()
-//                        new MyLoggerAdvisor()
+//                        new SimpleLoggerAdvisor()
+                        new MyLoggerAdvisor()
 //                        new ReReadingAdvisor()
                 )
                 .build();
