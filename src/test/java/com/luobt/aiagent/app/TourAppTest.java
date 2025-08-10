@@ -53,4 +53,12 @@ class TourAppTest {
         TourApp.TourReport tourReport = tourApp.doChatWithReport(message, chatId);
         Assertions.assertNotNull(tourReport);
     }
+
+    @Test
+    void doChatWithRag() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "你好，我是美美，我下周一个人想去北京旅游，预算只有2000";
+        String answer = tourApp.doChatWithRag(message, chatId);
+        Assertions.assertNotNull(answer);
+    }
 }
