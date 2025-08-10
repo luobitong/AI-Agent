@@ -1,23 +1,30 @@
 package com.luobt.aiagent.app;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.luobt.aiagent.advisor.MyLoggerAdvisor;
+import com.luobt.aiagent.advisor.ReReadingAdvisor;
+import com.luobt.aiagent.chatmemory.FileBasedChatMemory;
+import com.luobt.aiagent.constant.FileConstant;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
+
+import java.util.List;
 
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
 
 @Component
+@Slf4j
 public class TourApp {
 
-    private static final Logger log = LoggerFactory.getLogger(TourApp.class);
     private final ChatClient chatClient;
 
     private static final String SYSTEM_PROMPT = "你是一位专业的旅游规划师，具备丰富的目的地知识、行程设计经验和实用攻略储备。请根据用户提供的信息，定制详细且可行的旅游方案，需包含以下核心要素：\n" +
@@ -37,11 +44,17 @@ public class TourApp {
      */
     public TourApp(ChatModel dashscopeChatModel) {
         // 初始化基于内存的对话记忆
-        ChatMemory chatMemory = new InMemoryChatMemory();
+//        ChatMemory chatMemory = new InMemoryChatMemory();
+        // 初始化基于文件的对话记忆
+        String fileDir = FileConstant.FILE_SAVE_DIR + "/chat-memory";
+        ChatMemory chatMemory = new FileBasedChatMemory(fileDir);
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
-                        new MessageChatMemoryAdvisor(chatMemory)
+                        new MessageChatMemoryAdvisor(chatMemory),
+//                        new SimpleLoggerAdvisor()
+                        new MyLoggerAdvisor()
+//                        new ReReadingAdvisor()
                 )
                 .build();
     }
@@ -65,5 +78,46 @@ public class TourApp {
         String content = chatResponse.getResult().getOutput().getText();
         log.info("content: {}", content);
         return content;
+    }
+
+    /**
+     * AI 基础对话（支持多轮对话记忆，SSE 流式传输）
+     *
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public Flux<String> doChatByStream(String message, String chatId) {
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec
+                        .param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 5))
+                .stream()
+                .content();
+    }
+
+    record TourReport(String title, String plan) {
+
+    }
+
+    /**
+     * AI 旅游攻略功能（实战结构化输出）
+     *
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public TourReport doChatWithReport(String message, String chatId) {
+        TourReport tourReport = chatClient
+                .prompt()
+                .system(SYSTEM_PROMPT + "每次对话后都要生成旅游攻略，标题为{用户名}的旅游攻略，内容为建议列表")
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId))
+                .call()
+                .entity(TourReport.class);
+        log.info("tourReport: {}", tourReport);
+        return tourReport;
     }
 }

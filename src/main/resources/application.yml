@@ -20,3 +20,8 @@ springdoc:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.luobt.aiagent.controller
+# 修改日志级别，查看 Spring AI 更多调用细节
+logging:
+  level:
+    # 开启 Spring AI 内部调试日志（保留你的原有配置）
+    org.springframework.ai: DEBUG
