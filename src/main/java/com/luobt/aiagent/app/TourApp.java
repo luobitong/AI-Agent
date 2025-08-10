@@ -16,6 +16,8 @@ import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
@@ -127,7 +129,8 @@ public class TourApp {
 
     // AI 旅游知识库问答功能
 
-    @Resource
+    @Autowired
+    @Qualifier("tourAppVectorStore")
     private VectorStore tourAppVectorStore;
 
     /**
