@@ -1,9 +1,11 @@
 package com.luobt.aiagent.app;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.luobt.aiagent.advisor.MyLoggerAdvisor;
+import com.luobt.aiagent.advisor.ReReadingAdvisor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
@@ -15,9 +17,9 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
 
 @Component
+@Slf4j
 public class TourApp {
 
-    private static final Logger log = LoggerFactory.getLogger(TourApp.class);
     private final ChatClient chatClient;
 
     private static final String SYSTEM_PROMPT = "你是一位专业的旅游规划师，具备丰富的目的地知识、行程设计经验和实用攻略储备。请根据用户提供的信息，定制详细且可行的旅游方案，需包含以下核心要素：\n" +
@@ -41,7 +43,9 @@ public class TourApp {
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
-                        new MessageChatMemoryAdvisor(chatMemory)
+                        new MessageChatMemoryAdvisor(chatMemory),
+//                        new MyLoggerAdvisor()
+                        new ReReadingAdvisor()
                 )
                 .build();
     }
