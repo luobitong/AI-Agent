@@ -20,6 +20,11 @@ springdoc:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.luobt.aiagent.controller
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
 # 修改日志级别，查看 Spring AI 更多调用细节
 logging:
   level:
